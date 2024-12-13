@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String  @id @default(cuid())
+  email    String  @unique
+  name     String?
+  password String
+
+  campaing  UserCampaing[]
+  soundFile UserSoundFile[]
+  phoneList UserPhoneList[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Campaing {
+  id        String   @id @default(cuid())
+  name      String
+  comLimit  Int
+  dayLimit  Int
+  status    Int
+  startTime DateTime
+  endTime   DateTime
+  days      Int[]
+  reactions Json
+
+  user        UserCampaing?
+  soundFileId Int
+  phonesId    Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SoundFile {
+  id       Int    @id @default(autoincrement())
+  name     String
+  filePath String
+
+  user UserSoundFile[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PhoneList {
+  id     Int      @id @default(autoincrement())
+  name   String
+  phones String[]
+
+  user UserPhoneList[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserCampaing {
+  userId     String   @unique()
+  campaingId String   @unique()
+  user       User     @relation(fields: [userId], references: [id])
+  campaing   Campaing @relation(fields: [campaingId], references: [id])
+
+  @@id([userId, campaingId])
+}
+
+model UserSoundFile {
+  userId      String    @unique()
+  soundFileId Int       @unique()
+  user        User      @relation(fields: [userId], references: [id])
+  soundFile   SoundFile @relation(fields: [soundFileId], references: [id])
+
+  @@id([userId, soundFileId])
+}
+
+model UserPhoneList {
+  userId      String    @unique()
+  phoneListId Int       @unique()
+  user        User      @relation(fields: [userId], references: [id])
+  phoneList   PhoneList @relation(fields: [phoneListId], references: [id])
+
+  @@id([userId, phoneListId])
+}
